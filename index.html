@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AI Worker Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FAF9F6;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #01916D;
+      --border: #e5e3de;
+      --surface: #FFFFFF;
+      --surface-alt: #F5F4F0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 24px;
+      min-height: 100vh;
+    }
+
+    .screen { display: none; opacity: 0; transition: opacity 150ms ease; }
+    .screen.active { display: block; opacity: 1; }
+    #screen-loading.active { display: flex; }
+
+    #progress-bar-track {
+      position: fixed;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      height: 3px;
+      background: var(--border);
+      z-index: 100;
+      display: none;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 300ms ease;
+      width: 0%;
+    }
+
+    .btn {
+      width: 100%; height: 48px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 500;
+      cursor: pointer; border: none;
+      transition: background 200ms, color 200ms;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:disabled { background: #ccc; cursor: default; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    /* Screen 1 */
+    #screen-intro { padding-top: 72px; padding-bottom: 40px; }
+    .intro-headline {
+      font-family: 'Lora', serif; font-weight: 700;
+      font-size: 32px; line-height: 1.2; margin-bottom: 12px;
+    }
+    .intro-sub { font-size: 16px; font-weight: 500; color: var(--muted); margin-bottom: 20px; }
+    .intro-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 40px; }
+
+    /* Screen 2 */
+    #screen-quiz { padding-top: 28px; padding-bottom: 40px; }
+    .quiz-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; min-height: 32px;
+    }
+    .btn-back {
+      background: none; border: none;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      padding: 4px 0; display: flex; align-items: center; gap: 5px;
+    }
+    .btn-back.hidden { visibility: hidden; pointer-events: none; }
+    .q-counter { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.04em; }
+    #quiz-content { transition: opacity 120ms ease; }
+    .q-text {
+      font-family: 'Lora', serif; font-weight: 700;
+      font-size: 22px; line-height: 1.4; margin-bottom: 28px;
+    }
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-card {
+      width: 100%; padding: 16px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      color: var(--text); text-align: left; cursor: pointer;
+      line-height: 1.5; transition: border-color 150ms, background 150ms;
+    }
+    .option-card.selected { border: 2px solid var(--accent); background: #F0FAF7; }
+    .freetext-wrap { margin-top: 12px; display: none; }
+    .freetext-wrap.visible { display: block; }
+    .freetext-input {
+      width: 100%; padding: 12px 14px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+      outline: none;
+    }
+    .freetext-input:focus { border-color: var(--accent); }
+    .btn-continue-wrap { margin-top: 24px; display: none; }
+    .btn-continue-wrap.visible { display: block; }
+
+    /* Screen 3 */
+    #screen-loading {
+      flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; text-align: center; gap: 28px;
+    }
+    .spinner {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      animation: spin 800ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-msg { font-size: 15px; color: var(--muted); min-height: 24px; transition: opacity 300ms; }
+
+    /* Screen 4 */
+    #screen-result { padding-bottom: 60px; }
+    .result-hero { padding: 40px 0 28px; text-align: center; }
+    .result-arch-label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .result-arch-name {
+      font-family: 'Lora', serif; font-weight: 700;
+      font-size: 32px; line-height: 1.1; margin-bottom: 8px;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 400ms ease-out, transform 400ms ease-out;
+    }
+    .result-arch-name.entered { opacity: 1; transform: translateY(0); }
+    .result-tagline { font-weight: 500; font-size: 16px; color: var(--muted); margin-bottom: 14px; }
+    .result-pct { font-size: 13px; color: var(--muted); }
+    .result-divider { height: 1px; background: var(--border); margin: 0 0 24px; }
+    .result-para { font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 16px; }
+    .bcg-callout {
+      background: var(--surface-alt); border-left: 4px solid;
+      border-radius: 0 6px 6px 0; padding: 14px 16px; margin-bottom: 24px;
+      font-size: 14px; font-style: italic; line-height: 1.6; color: var(--muted);
+    }
+    .role-section { margin-bottom: 24px; }
+    .section-label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .traits-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .trait-chip {
+      font-size: 12px; font-weight: 500;
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid; background: transparent;
+    }
+    .strength-row, .watchout-row { margin-bottom: 14px; }
+    .strength-row .section-label, .watchout-row .section-label { margin-bottom: 4px; }
+    .strength-text, .watchout-text { font-size: 15px; line-height: 1.6; }
+    .retake-wrap { margin-top: 36px; text-align: center; }
+    .btn-retake { width: auto; padding: 0 28px; height: 44px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="progress-bar-track"><div id="progress-bar-fill"></div></div>
+
+  <div id="app">
+
+    <div id="screen-intro" class="screen active">
+      <h1 class="intro-headline">What Kind of AI Worker Are You?</h1>
+      <p class="intro-sub">6 questions. Discover your working style.</p>
+      <p class="intro-desc">Based on research from Harvard, MIT, and BCG — this quiz maps your natural working style to one of three AI collaboration archetypes. No AI experience needed.</p>
+      <button class="btn btn-primary" onclick="startQuiz()">Start</button>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+      <div class="quiz-nav">
+        <button class="btn-back hidden" id="btn-back" onclick="goBack()">&#8592; Back</button>
+        <span class="q-counter" id="q-counter">Q1 of 7</span>
+      </div>
+      <div id="quiz-content">
+        <div class="q-text" id="q-text"></div>
+        <div class="options-list" id="options-list"></div>
+        <div class="freetext-wrap" id="freetext-wrap">
+          <input class="freetext-input" id="freetext-input" type="text" placeholder="Tell us your role" />
+        </div>
+        <div class="btn-continue-wrap" id="btn-continue-wrap">
+          <button class="btn btn-primary" id="btn-continue" disabled onclick="continueFromQ7()">See my result</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-loading" class="screen">
+      <div class="spinner"></div>
+      <div class="loading-msg" id="loading-msg">Reading your working style...</div>
+    </div>
+
+    <div id="screen-result" class="screen">
+      <div class="result-hero" id="result-hero">
+        <div class="result-arch-label">Your Working Style</div>
+        <div class="result-arch-name" id="result-arch-name"></div>
+        <div class="result-tagline" id="result-tagline"></div>
+        <div class="result-pct" id="result-pct"></div>
+      </div>
+      <div class="result-divider"></div>
+      <div class="result-body" id="result-body"></div>
+      <div class="retake-wrap">
+        <button class="btn btn-ghost btn-retake" onclick="retakeQuiz()">Retake quiz</button>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    const ARCH_NAMES   = { CY: 'Cyborg', CE: 'Centaur', DE: 'Delegator' };
+    const ARCH_COLOURS = { CY: '#1a6cf6', CE: '#c97d1a', DE: '#c0392b' };
+
+    const ARCH_STATIC = {
+      CY: {
+        tagline: 'You move fluidly between your own thinking and AI output.',
+        description_p1: 'Cybogs integrate AI throughout their work rather than keeping it separate. The instinct is to stay in motion: start quickly, iterate with AI, refine as you go. They treat AI as a genuine thinking partner, not just a finishing tool.',
+        description_p2: 'In a marketing context, this shows up as rapid ideation, fast content cycles, and comfort with revising AI-generated drafts rather than starting from scratch. The speed advantage is real. The risk is producing work that moves fast but lacks the distinctiveness that comes from sustained human judgement.',
+        bcg_stat: 'Cybogs represent 60% of workers in the BCG study, the largest group, and the one showing the fastest rate of AI fluency development.',
+        growth_note: 'Growth edge: knowing which decisions genuinely need slow thinking, and protecting those from the speed instinct.',
+        strength: 'Moving fast without losing the thread.',
+        watch_out: 'Optimising for speed at the cost of depth.',
+        traits: ['Fast iteration', 'Collaborative thinking', 'Comfortable with ambiguity', 'Adaptive'],
+      },
+      CE: {
+        tagline: 'You bring deep expertise to every AI-assisted decision.',
+        description_p1: 'Centaurs make deliberate divisions between what they handle and what AI handles. Strong domain knowledge means they know exactly where AI adds value and where human judgement is the only reliable option. They do not outsource the hard parts.',
+        description_p2: 'In a B2B marketing context, this shows up as careful evaluation of AI output, high standards, and work that holds up under scrutiny. The trade-off is pace. Centaurs can struggle to ship when good enough would have served better.',
+        bcg_stat: 'Centaurs represent 14% of workers in the BCG study, the smallest group, and the one with the highest accuracy in human-AI collaboration.',
+        growth_note: 'Growth edge: recognising when faster, rougher iteration would produce a better outcome than a more deliberate approach.',
+        strength: 'Knowing exactly where to trust your own judgement.',
+        watch_out: 'Letting the perfect slow down the good.',
+        traits: ['High standards', 'Domain-led', 'Precise', 'Deliberate'],
+      },
+      DE: {
+        tagline: 'You use AI to clear the decks and move faster.',
+        description_p1: 'Delegators use AI primarily for efficiency: drafting, formatting, summarising, offloading tasks they would rather not spend time on. The instinct is throughput. Get it done, move on. AI is a workhorse, not a collaborator.',
+        description_p2: 'This is the most common starting point in the BCG research, and a functional one. The limitation is that the biggest quality and capability gains come from more active collaboration. Delegators who stay in this mode risk leaving both accuracy and creative range on the table.',
+        bcg_stat: 'Delegators represent 27% of workers in the BCG study, the most common starting point, with the most room to grow into more sophisticated AI collaboration.',
+        growth_note: 'Growth edge: bringing AI into the thinking stage, not just the execution stage.',
+        strength: 'Getting things done without overthinking the process.',
+        watch_out: 'Using AI only for output tasks, not for thinking.',
+        traits: ['Efficient', 'Output-focused', 'Pragmatic', 'Action-oriented'],
+      },
+    };
+
+    const ROLE_PARAGRAPHS = {
+      PM: {
+        CY: 'The iterative instinct that defines you becomes a structural advantage in product marketing. You can run messaging frameworks, competitive analyses, and positioning drafts through multiple AI iterations faster than most teams can schedule a review meeting. The next shift: becoming the person who sets the prompt standards others build from.',
+        CE: 'Product marketing lives and dies on precision. Your instinct to validate before shipping means you will use AI to generate options and pressure-test them rather than accepting the first plausible output. The work is moving toward prompt-led workflows. Your value is ensuring the strategy behind those prompts is sound.',
+        DE: 'AI makes it easy to produce positioning and messaging quickly. The risk in your working mode: producing more without improving the quality of the underlying thinking. The shift that matters is using AI earlier in the process, to stress-test strategy and surface competitive angles, not just to draft faster.',
+      },
+      BC: {
+        CY: 'Brand and comms work at speed suits your instincts, but brand is the easiest thing to erode through unchecked AI output. Your role is to move fast on AI-generated content while holding the line on voice, consistency, and what the brand will not say. That editorial authority becomes more valuable as output volume rises.',
+        CE: 'Your instinct to protect quality before publishing is exactly what brand and comms requires right now. AI generates content at volume. You are the one who knows which outputs are on-brand and which just look like they are. The opportunity: building a validation layer that scales your standards across the team.',
+        DE: 'AI makes high-volume content production fast. Brand and comms is one of the areas where moving fast without a strong editorial filter causes the most visible damage. The shift that matters: developing a clear internal standard for what passes and what does not, so delegation to AI has guardrails, not just speed.',
+      },
+      CX: {
+        CY: 'Customer experience is one of the highest-impact areas for AI augmentation: personalisation at scale, faster resolution, smarter journey mapping. Your comfort with rapid iteration puts you ahead. The natural next move is shifting from using AI in your own work to deploying it in customer-facing touchpoints, and building the feedback loops that keep it calibrated.',
+        CE: 'CX work involves real stakes: customer trust, brand perception, resolution quality. Your instinct to validate before deploying is the right one here. AI can personalise and accelerate customer interactions, but someone needs to be the expert who defines what good looks like and catches the outputs that do not meet it. That role is increasingly formal.',
+        DE: 'AI is already transforming CX through automation and self-service. If you are primarily using it to clear administrative tasks, you are leaving the larger opportunity on the table. The roles that will matter most in CX are the ones shaping how AI interacts with customers, not just processing requests faster.',
+      },
+      DA: {
+        CY: 'AI dramatically accelerates the time from data to insight, and your instinct to move quickly means you can get to answers faster than most. The discipline to build: distinguishing between insights AI surfaces because they are real and insights it surfaces because they pattern-match to what you asked. Speed without that filter produces confident wrong answers.',
+        CE: 'Analytics is one of the areas where your domain-first instinct has the most protective value. AI can generate plausible-looking analysis at speed. The question is always whether the underlying interpretation is sound. Your role is shifting toward asking better questions of AI-generated output, and owning what the data actually means, not just what it says.',
+        DE: 'AI makes it easy to run analyses and produce outputs quickly. The risk in your mode: treating AI-generated insight as finished rather than a starting point. Data analytics is one of the areas where the gap between what AI produces and what a business can act on remains significant. Owning that gap is where the role is heading.',
+      },
+      SO: {
+        CY: 'Sales ops runs on process accuracy, and your comfort with iteration means you will move quickly to automate and optimise. The opportunity is substantial: pipeline hygiene, CRM data quality, forecasting inputs. The discipline is identifying which workflows genuinely benefit from AI speed and which require a slower check to avoid compounding errors downstream.',
+        CE: 'Sales operations work is built on accuracy. Bad data compounds into bad forecasts. Your instinct to validate before committing is well-suited to AI-assisted workflow design: you are more likely to spot where automation introduces errors, and less likely to ship a process that looks efficient but breaks under real conditions.',
+        DE: 'AI can automate significant parts of sales operations: data entry, pipeline updates, report generation. If you are primarily using it for output tasks, that is a functional start. The higher-value shift is using AI to redesign the underlying workflows, not just speed up the existing ones. That is where the role is heading.',
+      },
+      MO: {
+        CY: 'Marketing operations is one of the roles where your instinct to iterate fast creates the most compound value. AI can automate campaign orchestration, lead scoring, and attribution logic at a scale that changes what the function can deliver. The next step: moving from using AI tools to designing the systems that run on them.',
+        CE: 'Marketing operations involves systems that touch everything. If something breaks, the impact is wide. Your deliberate approach to validation is well-matched to that responsibility. The opportunity is building AI-assisted workflows that are reliable, not just fast, and being the person who understands the failure modes well enough to design them out.',
+        DE: 'MOps is one of the highest-potential roles for AI leverage in a marketing team. The shift that matters is from using AI to complete tasks to using AI to redesign how the function operates: automated workflows, smarter segmentation, reduced manual overhead. If you are still at the task level, the role is moving faster than you are.',
+      },
+      RO: {
+        CY: 'RevOps is the connective tissue between sales, marketing, and customer success, and your instinct to iterate quickly makes you well-placed to keep pace with AI-driven change across all three. The forward-looking opportunity: building AI-assisted processes that share data cleanly across functions, and becoming the person who defines how those systems get governed.',
+        CE: 'RevOps works precisely because it holds a high standard for data consistency and process reliability across functions. AI can accelerate a lot of the work, but someone needs to be the expert who decides which AI-generated outputs are trustworthy enough to act on cross-functionally. That validation role is growing, not shrinking.',
+        DE: 'RevOps generates significant leverage when it runs well, and AI has the potential to accelerate that substantially. The gap in your current mode: using AI primarily for task completion rather than workflow redesign. The roles that shape RevOps going forward will be rebuilding how data moves and decisions get made across the revenue team.',
+      },
+      CD: {
+        CY: 'Demand gen runs on volume, iteration, and consistency, and your working style is well-matched to all three. AI can compress the time between brief and live significantly. The natural evolution: shifting from using AI to execute campaigns to designing the prompt and workflow infrastructure that lets you run more without proportional increases in time or headcount.',
+        CE: 'Campaign work involves a lot of repetitive production, and your instinct to do things properly can slow you down in areas where AI can handle the volume without quality risk. The practical opportunity: identifying where AI can take the load, freeing your deliberate attention for the creative and strategic decisions that actually require it.',
+        DE: 'Campaigns and demand gen is one of the areas where AI can most immediately increase throughput. If you are already using it to move faster, the next shift is about consistency and quality control at scale, making sure the volume AI helps you produce holds together strategically, not just tactically.',
+      },
+      DG: {
+        CY: 'Deal governance involves approval workflows and accuracy standards that carry real business risk. Your instinct to move quickly is an asset in many contexts, but this is one where validating AI-assisted output matters more than usual. The forward-looking opportunity: using AI to surface risks earlier in the process, while keeping human sign-off exactly where it needs to be.',
+        CE: 'Deal governance is built on precision. The cost of an error is not just internal: it can affect revenue recognition or contract validity. AI can help you process deal structures and flag anomalies faster. Your expertise is the layer that decides what to do about them. That judgement is not easy to replicate.',
+        DE: 'Deal governance is one of the areas where delegating too much to AI carries real risk. The accuracy standards are high and the downstream consequences of errors are significant. The useful shift: bringing AI in earlier to surface issues for review, rather than using it to process approvals faster. Speed without review is the wrong trade-off here.',
+      },
+      SC: {
+        CY: 'Sales compensation modelling involves numbers people care deeply about. Errors do not stay internal. Your instinct to move fast and iterate is an advantage for building and testing models quickly, but this is one of the contexts where AI output needs a thorough check before it touches anything live. Build the speed, keep the verification step.',
+        CE: 'Sales compensation is one of the highest-stakes accuracy domains in a revenue organisation. AI can help you model scenarios and check calculations, but the judgement about whether the model is right, and what to do when it produces anomalies, stays yours. That expertise is increasingly difficult to replicate.',
+        DE: 'Sales comp work involves modelling that people act on and dispute. Using AI to speed up the production of models without a strong review process is the category of error that ends up in uncomfortable conversations. The shift worth making: using AI to run more scenarios faster, not to reduce the human checking the role requires.',
+      },
+      LM: {
+        CY: 'Your natural comfort with AI puts you ahead of most leaders right now, but the role is shifting from using it yourself to building the capability across your team. The teams that move fastest will be the ones whose leaders understood early that AI changes how work is divided, what skills matter, and where human oversight stays essential.',
+        CE: 'Leadership in an AI context requires exactly the kind of deliberate judgement you bring: knowing which AI-assisted decisions need human review and which can be trusted. The forward-looking responsibility is building that same discernment across your team, defining what standards apply, who owns what, and where the human stays in the loop.',
+        DE: 'Leaders who primarily use AI to reduce their own workload will miss the more significant lever: reshaping how their team works. The organisations gaining ground are the ones whose leaders are actively redesigning workflows, not just using AI to process faster. The shift is from personal productivity gain to team capability building.',
+      },
+      AE: {
+        CY: 'Admin and executive support work is already being transformed by AI: scheduling, communication drafting, document management. Your comfort with these tools puts you ahead. The less obvious opportunity: becoming the person who helps others in the organisation understand and use AI effectively, translating what it can do into practical support for the people around you.',
+        CE: 'Executive support depends on accuracy, discretion, and understanding what the people you support actually need, which is not always what they ask for. AI can handle significant volumes of coordination and drafting work. Your expertise is knowing which outputs are right, which need adjustment, and which carry context AI cannot access. That judgement is hard to replace.',
+        DE: 'AI is well-suited to many of the repetitive coordination tasks in executive support: scheduling, email drafting, document formatting. If you are already using it for these, the next shift is ensuring the outputs meet the standard the people you support expect. Speed is easy. Calibrated quality that requires no correction is harder, and more valuable.',
+      },
+    };
+
+    const QUESTIONS = [
+      {
+        text: 'You need to produce something from scratch — a brief, a proposal, a campaign idea. What\'s your natural first move?',
+        options: [
+          { label: 'I think it through properly first. I\'d rather start slower and write it once.', arch: 'CE' },
+          { label: 'I just start — the shape emerges as I go, and I refine from there.', arch: 'CY' },
+          { label: 'I find an existing example I can work from. No point reinventing the wheel.', arch: 'DE' },
+        ],
+      },
+      {
+        text: 'Someone gives you pointed feedback on work you\'re proud of. What\'s your instinct?',
+        options: [
+          { label: 'I sit with it before responding. I need to decide whether I agree before I act.', arch: 'CE' },
+          { label: 'I want to talk it through — the reasoning behind feedback matters as much as the feedback itself.', arch: 'CY' },
+          { label: 'I implement it and move on. Feedback is an input, not a discussion.', arch: 'DE' },
+        ],
+      },
+      {
+        text: 'Looking back at projects you\'ve found most satisfying, where did your contribution matter most?',
+        options: [
+          { label: 'In the sharp end — the analysis, the writing, the judgement call that needed deep expertise.', arch: 'CE' },
+          { label: 'In the iteration — the back-and-forth that got it from a decent draft to something genuinely good.', arch: 'CY' },
+          { label: 'In getting it done. Completion and delivery satisfy me more than the process of getting there.', arch: 'DE' },
+        ],
+      },
+      {
+        text: 'How comfortable are you showing work that isn\'t ready yet?',
+        options: [
+          { label: 'Uncomfortable — I like to fully think something through before inviting other perspectives in.', arch: 'CE' },
+          { label: 'Fine with it — early sharing almost always makes the work better, even if it feels exposed.', arch: 'CY' },
+          { label: 'I share it when asked, but I\'d rather the bar for \'ready\' just be lower so we move faster.', arch: 'DE' },
+        ],
+      },
+      {
+        text: 'There\'s something on your plate that\'s necessary but genuinely boring. What do you actually do?',
+        options: [
+          { label: 'I block time and do it to the same standard as everything else. Quality doesn\'t depend on interest.', arch: 'CE' },
+          { label: 'I find a way to make it engaging — reframe it, bring someone in, find the angle that makes it interesting.', arch: 'CY' },
+          { label: 'I get through it as fast as I can. Efficiency is the goal when enthusiasm isn\'t available.', arch: 'DE' },
+        ],
+      },
+      {
+        text: 'You need to make a call but don\'t have everything you\'d want to know. What do you do?',
+        options: [
+          { label: 'I identify the single most critical unknown and go find it before I decide anything else.', arch: 'CE' },
+          { label: 'I talk it through with someone — externalising the problem usually surfaces what I actually think.', arch: 'CY' },
+          { label: 'I make the best call with what I have and adjust if needed. Waiting costs as much as deciding wrong.', arch: 'DE' },
+        ],
+      },
+      {
+        isJobFunction: true,
+        text: 'What best describes your role?',
+        options: [
+          { label: 'Product Marketing', code: 'PM' },
+          { label: 'Brand & Comms', code: 'BC' },
+          { label: 'Customer Experience', code: 'CX' },
+          { label: 'Business / Data Analytics', code: 'DA' },
+          { label: 'Sales Operations', code: 'SO' },
+          { label: 'Marketing Operations', code: 'MO' },
+          { label: 'RevOps', code: 'RO' },
+          { label: 'Campaigns / Demand Gen', code: 'CD' },
+          { label: 'Deal Governance', code: 'DG' },
+          { label: 'Sales Compensation', code: 'SC' },
+          { label: 'Leadership / Management', code: 'LM' },
+          { label: 'Admin & Executive Support', code: 'AE' },
+          { label: 'Other', code: 'OT' },
+        ],
+      },
+    ];
+
+    // ── State ─────────────────────────────────────────────────────────────────
+
+    let currentQ = 0;
+    let answers = new Array(QUESTIONS.length).fill(null);
+    let loadingInterval = null;
+
+    // ── Scoring ───────────────────────────────────────────────────────────────
+
+    function calcScores() {
+      const s = { CY: 0, CE: 0, DE: 0 };
+      for (let i = 0; i < 6; i++) {
+        const a = answers[i];
+        if (a && a.arch) s[a.arch]++;
+      }
+      return s;
+    }
+
+    function calcResult(scores) {
+      const tiebreak = ['CY', 'DE', 'CE'];
+      const sorted = Object.keys(scores).sort((a, b) =>
+        scores[b] !== scores[a] ? scores[b] - scores[a] : tiebreak.indexOf(a) - tiebreak.indexOf(b)
+      );
+      return {
+        dominant: sorted[0],
+        secondary: scores[sorted[1]] >= 2 ? sorted[1] : null,
+      };
+    }
+
+    function pct(scores, arch) {
+      return Math.round((scores[arch] / 6) * 100);
+    }
+
+    // ── Quiz ──────────────────────────────────────────────────────────────────
+
+    function startQuiz() {
+      currentQ = 0;
+      answers = new Array(QUESTIONS.length).fill(null);
+      document.getElementById('progress-bar-track').style.display = 'block';
+      showScreen('screen-quiz');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentQ];
+      const prev = answers[currentQ];
+
+      document.getElementById('btn-back').className = currentQ > 0 ? 'btn-back' : 'btn-back hidden';
+      document.getElementById('q-counter').textContent = `Q${currentQ + 1} of ${QUESTIONS.length}`;
+      document.getElementById('q-text').textContent = q.text;
+
+      const listEl = document.getElementById('options-list');
+      listEl.innerHTML = '';
+      const opts = q.isJobFunction ? q.options : shuffle(q.options);
+
+      opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-card';
+        btn.textContent = opt.label;
+        if (prev) {
+          const match = q.isJobFunction ? prev.code === opt.code : prev.arch === opt.arch;
+          if (match) btn.classList.add('selected');
+        }
+        btn.addEventListener('click', () => selectOption(btn, opt, q));
+        listEl.appendChild(btn);
+      });
+
+      const freetextWrap = document.getElementById('freetext-wrap');
+      const continueBtnWrap = document.getElementById('btn-continue-wrap');
+      const continueBtn = document.getElementById('btn-continue');
+
+      if (q.isJobFunction) {
+        continueBtnWrap.classList.add('visible');
+        continueBtn.disabled = !prev;
+        if (prev && prev.code === 'OT') {
+          freetextWrap.classList.add('visible');
+          document.getElementById('freetext-input').value = prev.freeText || '';
+        } else {
+          freetextWrap.classList.remove('visible');
+          document.getElementById('freetext-input').value = '';
+        }
+      } else {
+        continueBtnWrap.classList.remove('visible');
+        freetextWrap.classList.remove('visible');
+        continueBtn.disabled = true;
+      }
+
+      document.getElementById('progress-bar-fill').style.width =
+        ((currentQ / QUESTIONS.length) * 100) + '%';
+    }
+
+    function selectOption(btnEl, opt, q) {
+      document.querySelectorAll('.option-card').forEach(b => b.classList.remove('selected'));
+      btnEl.classList.add('selected');
+
+      if (q.isJobFunction) {
+        const freetextWrap = document.getElementById('freetext-wrap');
+        const freetextInput = document.getElementById('freetext-input');
+        if (opt.code === 'OT') {
+          freetextWrap.classList.add('visible');
+        } else {
+          freetextWrap.classList.remove('visible');
+          freetextInput.value = '';
+        }
+        answers[currentQ] = { ...opt, freeText: '' };
+        document.getElementById('btn-continue').disabled = false;
+      } else {
+        answers[currentQ] = opt;
+        setTimeout(advance, 280);
+      }
+    }
+
+    function advance() {
+      currentQ++;
+      if (currentQ < QUESTIONS.length) transitionQ();
+      else submitQuiz();
+    }
+
+    function goBack() {
+      if (currentQ > 0) { currentQ--; transitionQ(); }
+    }
+
+    function continueFromQ7() {
+      const ans = answers[currentQ];
+      if (!ans) return;
+      if (ans.code === 'OT') {
+        answers[currentQ] = { ...ans, freeText: document.getElementById('freetext-input').value.trim() };
+      }
+      currentQ++;
+      submitQuiz();
+    }
+
+    function transitionQ() {
+      const c = document.getElementById('quiz-content');
+      c.style.opacity = '0';
+      setTimeout(() => { renderQuestion(); c.style.opacity = '1'; }, 120);
+    }
+
+    // ── Submission ────────────────────────────────────────────────────────────
+
+    function submitQuiz() {
+      const scores = calcScores();
+      const { dominant, secondary } = calcResult(scores);
+      const jobAns = answers[6];
+      const jobCode = jobAns ? jobAns.code : null;
+      const jobFreeText = (jobAns && jobAns.freeText) ? jobAns.freeText : '';
+
+      document.getElementById('progress-bar-track').style.display = 'none';
+
+      if (jobCode === 'OT') {
+        showScreen('screen-loading');
+        startLoadingMessages();
+        callAPI(scores, dominant, secondary, jobFreeText);
+      } else {
+        renderResult(scores, dominant, secondary, buildStaticData(dominant, jobCode));
+      }
+    }
+
+    function buildStaticData(dominant, jobCode) {
+      const s = ARCH_STATIC[dominant];
+      return {
+        tagline: s.tagline,
+        description_p1: s.description_p1,
+        description_p2: s.description_p2,
+        role_paragraph: (jobCode && ROLE_PARAGRAPHS[jobCode]) ? ROLE_PARAGRAPHS[jobCode][dominant] : null,
+        strength: s.strength,
+        watch_out: s.watch_out,
+        traits: s.traits,
+      };
+    }
+
+    async function callAPI(scores, dominant, secondary, jobFreeText) {
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            archScores: scores,
+            dominantArch: dominant,
+            secondaryArch: secondary,
+            jobFunction: 'OT',
+            jobFunctionFreeText: jobFreeText,
+          }),
+        });
+        stopLoadingMessages();
+        if (!res.ok) throw new Error('API ' + res.status);
+        const data = await res.json();
+        renderResult(scores, dominant, secondary, data);
+      } catch (err) {
+        console.error('API failed:', err);
+        stopLoadingMessages();
+        renderResult(scores, dominant, secondary, buildStaticData(dominant, null));
+      }
+    }
+
+    // ── Loading messages ──────────────────────────────────────────────────────
+
+    const LOADING_MSGS = [
+      'Reading your working style...',
+      'Consulting the research...',
+      'Mapping your result...',
+      'Almost there...',
+    ];
+    let loadingMsgIdx = 0;
+
+    function startLoadingMessages() {
+      loadingMsgIdx = 0;
+      document.getElementById('loading-msg').textContent = LOADING_MSGS[0];
+      loadingInterval = setInterval(() => {
+        loadingMsgIdx = (loadingMsgIdx + 1) % LOADING_MSGS.length;
+        const el = document.getElementById('loading-msg');
+        el.style.opacity = '0';
+        setTimeout(() => { el.textContent = LOADING_MSGS[loadingMsgIdx]; el.style.opacity = '1'; }, 300);
+      }, 2000);
+    }
+
+    function stopLoadingMessages() {
+      clearInterval(loadingInterval);
+      loadingInterval = null;
+    }
+
+    // ── Result ────────────────────────────────────────────────────────────────
+
+    function renderResult(scores, dominant, secondary, data) {
+      const colour = ARCH_COLOURS[dominant];
+      const name   = ARCH_NAMES[dominant];
+      const stat   = ARCH_STATIC[dominant];
+
+      document.getElementById('result-hero').style.background = hexToRgba(colour, 0.08);
+      document.getElementById('result-arch-name').textContent = name;
+      document.getElementById('result-arch-name').style.color = colour;
+      document.getElementById('result-tagline').textContent = str(data.tagline);
+      document.getElementById('result-pct').textContent = secondary
+        ? `${name} ${pct(scores, dominant)}%  ·  ${ARCH_NAMES[secondary]} ${pct(scores, secondary)}%`
+        : `${name} ${pct(scores, dominant)}%`;
+
+      const body = document.getElementById('result-body');
+      body.innerHTML = '';
+
+      para(body, data.description_p1);
+      para(body, data.description_p2);
+
+      const bcg = el('div', 'bcg-callout');
+      bcg.style.borderLeftColor = colour;
+      bcg.textContent = stat.bcg_stat + ' ' + stat.growth_note;
+      body.appendChild(bcg);
+
+      if (data.role_paragraph) {
+        const sec = el('div', 'role-section');
+        sec.appendChild(label('In your role'));
+        const rp = el('p', 'result-para');
+        rp.style.marginBottom = '0';
+        rp.textContent = data.role_paragraph;
+        sec.appendChild(rp);
+        body.appendChild(sec);
+      }
+
+      if (Array.isArray(data.traits) && data.traits.length) {
+        const tl = label('Your traits');
+        tl.style.marginTop = '24px';
+        body.appendChild(tl);
+        const tw = el('div', 'traits-wrap');
+        data.traits.slice(0, 4).forEach(t => {
+          const chip = el('span', 'trait-chip');
+          chip.style.borderColor = colour;
+          chip.style.color = colour;
+          chip.textContent = t;
+          tw.appendChild(chip);
+        });
+        body.appendChild(tw);
+      }
+
+      row(body, 'Core strength', data.strength, 'strength-row', 'strength-text');
+      row(body, 'Watch out for', data.watch_out, 'watchout-row', 'watchout-text');
+
+      showScreen('screen-result');
+      requestAnimationFrame(() => requestAnimationFrame(() =>
+        setTimeout(() => document.getElementById('result-arch-name').classList.add('entered'), 50)
+      ));
+    }
+
+    function retakeQuiz() {
+      document.getElementById('result-arch-name').classList.remove('entered');
+      document.getElementById('result-hero').style.background = '';
+      showScreen('screen-intro');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+        s.style.opacity = '0';
+      });
+      const t = document.getElementById(id);
+      t.style.display = id === 'screen-loading' ? 'flex' : 'block';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        t.classList.add('active');
+        t.style.opacity = '1';
+      }));
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function el(tag, cls) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      return e;
+    }
+    function para(parent, text) {
+      if (!text) return;
+      const p = el('p', 'result-para');
+      p.textContent = text;
+      parent.appendChild(p);
+    }
+    function label(text) {
+      const d = el('div', 'section-label');
+      d.textContent = text;
+      return d;
+    }
+    function row(parent, labelText, text, rowCls, textCls) {
+      if (!text) return;
+      const d = el('div', rowCls);
+      d.appendChild(label(labelText));
+      const t = el('div', textCls);
+      t.textContent = text;
+      d.appendChild(t);
+      parent.appendChild(d);
+    }
+    function str(v) { return typeof v === 'string' ? v : ''; }
+    function hexToRgba(hex, a) {
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+  </script>
+</body>
+</html>
