@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AI Worker Quiz</title>
+  <title>AI Collaborator Quiz</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -182,8 +182,8 @@
   <div id="app">
 
     <div id="screen-intro" class="screen active">
-      <h1 class="intro-headline">What Kind of AI Worker Are You?</h1>
-      <p class="intro-sub">6 questions. Discover your working style.</p>
+      <h1 class="intro-headline">What Kind of AI Collaborator Are You?</h1>
+      <p class="intro-sub">6 questions to discover your working style.</p>
       <p class="intro-desc">Based on research from Harvard, MIT, and BCG — this quiz maps your natural working style to one of three AI collaboration archetypes. No AI experience needed.</p>
       <button class="btn btn-primary" onclick="startQuiz()">Start</button>
     </div>
@@ -232,9 +232,9 @@
     const ARCH_STATIC = {
       CY: {
         tagline: 'You move fluidly between your own thinking and AI output.',
-        description_p1: 'Cybogs integrate AI throughout their work rather than keeping it separate. The instinct is to stay in motion: start quickly, iterate with AI, refine as you go. They treat AI as a genuine thinking partner, not just a finishing tool.',
-        description_p2: 'In a marketing context, this shows up as rapid ideation, fast content cycles, and comfort with revising AI-generated drafts rather than starting from scratch. The speed advantage is real. The risk is producing work that moves fast but lacks the distinctiveness that comes from sustained human judgement.',
-        bcg_stat: 'Cybogs represent 60% of workers in the BCG study, the largest group, and the one showing the fastest rate of AI fluency development.',
+        description_p1: 'Cyborgs integrate AI throughout their work rather than keeping it separate. The instinct is to stay in motion: start quickly, iterate with AI, refine as you go. They treat AI as a genuine thinking partner, not just a finishing tool.',
+        description_p2: 'In practice, this shows up as rapid iteration, a preference for revising AI-generated drafts over starting from scratch, and comfort with work that is always in motion. The speed advantage is real. The risk is producing work that moves fast but lacks the distinctiveness that comes from sustained human judgement.',
+        bcg_stat: 'Cyborgs represent 60% of workers in the BCG study, the largest group, and the one showing the fastest rate of AI fluency development.',
         growth_note: 'Growth edge: knowing which decisions genuinely need slow thinking, and protecting those from the speed instinct.',
         strength: 'Moving fast without losing the thread.',
         watch_out: 'Optimising for speed at the cost of depth.',
@@ -243,7 +243,7 @@
       CE: {
         tagline: 'You bring deep expertise to every AI-assisted decision.',
         description_p1: 'Centaurs make deliberate divisions between what they handle and what AI handles. Strong domain knowledge means they know exactly where AI adds value and where human judgement is the only reliable option. They do not outsource the hard parts.',
-        description_p2: 'In a B2B marketing context, this shows up as careful evaluation of AI output, high standards, and work that holds up under scrutiny. The trade-off is pace. Centaurs can struggle to ship when good enough would have served better.',
+        description_p2: 'In practice, this shows up as careful evaluation of AI output, consistent quality, and work that holds up under scrutiny. The trade-off is pace. Centaurs can struggle to ship when good enough would have served better.',
         bcg_stat: 'Centaurs represent 14% of workers in the BCG study, the smallest group, and the one with the highest accuracy in human-AI collaboration.',
         growth_note: 'Growth edge: recognising when faster, rougher iteration would produce a better outcome than a more deliberate approach.',
         strength: 'Knowing exactly where to trust your own judgement.',
@@ -253,7 +253,7 @@
       DE: {
         tagline: 'You use AI to clear the decks and move faster.',
         description_p1: 'Delegators use AI primarily for efficiency: drafting, formatting, summarising, offloading tasks they would rather not spend time on. The instinct is throughput. Get it done, move on. AI is a workhorse, not a collaborator.',
-        description_p2: 'This is the most common starting point in the BCG research, and a functional one. The limitation is that the biggest quality and capability gains come from more active collaboration. Delegators who stay in this mode risk leaving both accuracy and creative range on the table.',
+        description_p2: 'This is the most common starting point in the BCG research, and a functional one. The limitation is that the biggest gains in quality and capability come from more active collaboration. Delegators who stay in this mode risk leaving both accuracy and creative range on the table.',
         bcg_stat: 'Delegators represent 27% of workers in the BCG study, the most common starting point, with the most room to grow into more sophisticated AI collaboration.',
         growth_note: 'Growth edge: bringing AI into the thinking stage, not just the execution stage.',
         strength: 'Getting things done without overthinking the process.',
@@ -378,19 +378,19 @@
         isJobFunction: true,
         text: 'What best describes your role?',
         options: [
-          { label: 'Product Marketing', code: 'PM' },
-          { label: 'Brand & Comms', code: 'BC' },
-          { label: 'Customer Experience', code: 'CX' },
+          { label: 'Product Marketing',         code: 'PM' },
+          { label: 'Brand & Comms',             code: 'BC' },
+          { label: 'Customer Experience',       code: 'CX' },
           { label: 'Business / Data Analytics', code: 'DA' },
-          { label: 'Sales Operations', code: 'SO' },
-          { label: 'Marketing Operations', code: 'MO' },
-          { label: 'RevOps', code: 'RO' },
-          { label: 'Campaigns / Demand Gen', code: 'CD' },
-          { label: 'Deal Governance', code: 'DG' },
-          { label: 'Sales Compensation', code: 'SC' },
-          { label: 'Leadership / Management', code: 'LM' },
+          { label: 'Sales Operations',          code: 'SO' },
+          { label: 'Marketing Operations',      code: 'MO' },
+          { label: 'RevOps',                    code: 'RO' },
+          { label: 'Campaigns / Demand Gen',    code: 'CD' },
+          { label: 'Deal Governance',           code: 'DG' },
+          { label: 'Sales Compensation',        code: 'SC' },
+          { label: 'Leadership / Management',   code: 'LM' },
           { label: 'Admin & Executive Support', code: 'AE' },
-          { label: 'Other', code: 'OT' },
+          { label: 'Other',                     code: 'OT' },
         ],
       },
     ];
@@ -398,7 +398,7 @@
     // ── State ─────────────────────────────────────────────────────────────────
 
     let currentQ = 0;
-    let answers = new Array(QUESTIONS.length).fill(null);
+    let answers  = new Array(QUESTIONS.length).fill(null);
     let loadingInterval = null;
 
     // ── Scoring ───────────────────────────────────────────────────────────────
@@ -418,7 +418,7 @@
         scores[b] !== scores[a] ? scores[b] - scores[a] : tiebreak.indexOf(a) - tiebreak.indexOf(b)
       );
       return {
-        dominant: sorted[0],
+        dominant:  sorted[0],
         secondary: scores[sorted[1]] >= 2 ? sorted[1] : null,
       };
     }
@@ -431,41 +431,38 @@
 
     function startQuiz() {
       currentQ = 0;
-      answers = new Array(QUESTIONS.length).fill(null);
+      answers  = new Array(QUESTIONS.length).fill(null);
       document.getElementById('progress-bar-track').style.display = 'block';
       showScreen('screen-quiz');
       renderQuestion();
     }
 
     function renderQuestion() {
-      const q = QUESTIONS[currentQ];
+      const q    = QUESTIONS[currentQ];
       const prev = answers[currentQ];
 
-      document.getElementById('btn-back').className = currentQ > 0 ? 'btn-back' : 'btn-back hidden';
-      document.getElementById('q-counter').textContent = `Q${currentQ + 1} of ${QUESTIONS.length}`;
+      document.getElementById('btn-back').className =
+        currentQ > 0 ? 'btn-back' : 'btn-back hidden';
+      document.getElementById('q-counter').textContent =
+        `Q${currentQ + 1} of ${QUESTIONS.length}`;
       document.getElementById('q-text').textContent = q.text;
 
-      const listEl = document.getElementById('options-list');
-      listEl.innerHTML = '';
-      const opts = q.isJobFunction ? q.options : shuffle(q.options);
-
-      opts.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-card';
-        btn.textContent = opt.label;
-        if (prev) {
-          const match = q.isJobFunction ? prev.code === opt.code : prev.arch === opt.arch;
-          if (match) btn.classList.add('selected');
-        }
-        btn.addEventListener('click', () => selectOption(btn, opt, q));
-        listEl.appendChild(btn);
-      });
-
-      const freetextWrap = document.getElementById('freetext-wrap');
+      const listEl          = document.getElementById('options-list');
+      const freetextWrap    = document.getElementById('freetext-wrap');
       const continueBtnWrap = document.getElementById('btn-continue-wrap');
-      const continueBtn = document.getElementById('btn-continue');
+      const continueBtn     = document.getElementById('btn-continue');
+      listEl.innerHTML = '';
 
       if (q.isJobFunction) {
+        // Fixed order, no shuffle
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-card';
+          btn.textContent = opt.label;
+          if (prev && prev.code === opt.code) btn.classList.add('selected');
+          btn.addEventListener('click', () => selectJobOption(btn, opt));
+          listEl.appendChild(btn);
+        });
         continueBtnWrap.classList.add('visible');
         continueBtn.disabled = !prev;
         if (prev && prev.code === 'OT') {
@@ -476,34 +473,53 @@
           document.getElementById('freetext-input').value = '';
         }
       } else {
-        continueBtnWrap.classList.remove('visible');
         freetextWrap.classList.remove('visible');
+        continueBtnWrap.classList.remove('visible');
         continueBtn.disabled = true;
+        const opts = shuffle(q.options);
+        opts.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-card';
+          btn.textContent = opt.label;
+          if (prev && prev.arch === opt.arch) btn.classList.add('selected');
+          btn.addEventListener('click', () => selectOption(btn, opt));
+          listEl.appendChild(btn);
+        });
       }
 
       document.getElementById('progress-bar-fill').style.width =
         ((currentQ / QUESTIONS.length) * 100) + '%';
     }
 
-    function selectOption(btnEl, opt, q) {
+    function selectOption(btnEl, opt) {
       document.querySelectorAll('.option-card').forEach(b => b.classList.remove('selected'));
       btnEl.classList.add('selected');
+      answers[currentQ] = opt;
+      setTimeout(advance, 280);
+    }
 
-      if (q.isJobFunction) {
-        const freetextWrap = document.getElementById('freetext-wrap');
-        const freetextInput = document.getElementById('freetext-input');
-        if (opt.code === 'OT') {
-          freetextWrap.classList.add('visible');
-        } else {
-          freetextWrap.classList.remove('visible');
-          freetextInput.value = '';
-        }
-        answers[currentQ] = { ...opt, freeText: '' };
-        document.getElementById('btn-continue').disabled = false;
+    function selectJobOption(btnEl, opt) {
+      document.querySelectorAll('.option-card').forEach(b => b.classList.remove('selected'));
+      btnEl.classList.add('selected');
+      const freetextWrap = document.getElementById('freetext-wrap');
+      if (opt.code === 'OT') {
+        freetextWrap.classList.add('visible');
       } else {
-        answers[currentQ] = opt;
-        setTimeout(advance, 280);
+        freetextWrap.classList.remove('visible');
+        document.getElementById('freetext-input').value = '';
       }
+      answers[currentQ] = { ...opt, freeText: '' };
+      document.getElementById('btn-continue').disabled = false;
+    }
+
+    function continueFromQ7() {
+      const ans = answers[6];
+      if (!ans) return;
+      if (ans.code === 'OT') {
+        answers[6] = { ...ans, freeText: document.getElementById('freetext-input').value.trim() };
+      }
+      currentQ++;
+      submitQuiz();
     }
 
     function advance() {
@@ -514,16 +530,6 @@
 
     function goBack() {
       if (currentQ > 0) { currentQ--; transitionQ(); }
-    }
-
-    function continueFromQ7() {
-      const ans = answers[currentQ];
-      if (!ans) return;
-      if (ans.code === 'OT') {
-        answers[currentQ] = { ...ans, freeText: document.getElementById('freetext-input').value.trim() };
-      }
-      currentQ++;
-      submitQuiz();
     }
 
     function transitionQ() {
@@ -537,55 +543,60 @@
     function submitQuiz() {
       const scores = calcScores();
       const { dominant, secondary } = calcResult(scores);
-      const jobAns = answers[6];
+      const jobAns  = answers[6];
       const jobCode = jobAns ? jobAns.code : null;
-      const jobFreeText = (jobAns && jobAns.freeText) ? jobAns.freeText : '';
 
       document.getElementById('progress-bar-track').style.display = 'none';
 
       if (jobCode === 'OT') {
+        // Only "Other" needs the API — for the role paragraph
+        const roleText = (jobAns && jobAns.freeText) ? jobAns.freeText : '';
         showScreen('screen-loading');
         startLoadingMessages();
-        callAPI(scores, dominant, secondary, jobFreeText);
+        callAPI(scores, dominant, secondary, roleText);
       } else {
-        renderResult(scores, dominant, secondary, buildStaticData(dominant, jobCode));
+        // Named roles: instant static result
+        const rolePara = (jobCode && ROLE_PARAGRAPHS[jobCode])
+          ? ROLE_PARAGRAPHS[jobCode][dominant]
+          : null;
+        renderResult(scores, dominant, secondary, { ...buildStaticData(dominant), role_paragraph: rolePara });
       }
     }
 
-    function buildStaticData(dominant, jobCode) {
+    function buildStaticData(dominant) {
       const s = ARCH_STATIC[dominant];
       return {
-        tagline: s.tagline,
+        tagline:        s.tagline,
         description_p1: s.description_p1,
         description_p2: s.description_p2,
-        role_paragraph: (jobCode && ROLE_PARAGRAPHS[jobCode]) ? ROLE_PARAGRAPHS[jobCode][dominant] : null,
-        strength: s.strength,
-        watch_out: s.watch_out,
-        traits: s.traits,
+        role_paragraph: null,
+        strength:       s.strength,
+        watch_out:      s.watch_out,
+        traits:         s.traits,
       };
     }
 
-    async function callAPI(scores, dominant, secondary, jobFreeText) {
+    async function callAPI(scores, dominant, secondary, roleText) {
+      const staticData = buildStaticData(dominant);
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            archScores: scores,
+            archScores:   scores,
             dominantArch: dominant,
             secondaryArch: secondary,
-            jobFunction: 'OT',
-            jobFunctionFreeText: jobFreeText,
+            roleText,
           }),
         });
         stopLoadingMessages();
         if (!res.ok) throw new Error('API ' + res.status);
         const data = await res.json();
-        renderResult(scores, dominant, secondary, data);
+        renderResult(scores, dominant, secondary, { ...staticData, role_paragraph: data.role_paragraph || null });
       } catch (err) {
         console.error('API failed:', err);
         stopLoadingMessages();
-        renderResult(scores, dominant, secondary, buildStaticData(dominant, null));
+        renderResult(scores, dominant, secondary, staticData);
       }
     }
 
@@ -604,9 +615,12 @@
       document.getElementById('loading-msg').textContent = LOADING_MSGS[0];
       loadingInterval = setInterval(() => {
         loadingMsgIdx = (loadingMsgIdx + 1) % LOADING_MSGS.length;
-        const el = document.getElementById('loading-msg');
-        el.style.opacity = '0';
-        setTimeout(() => { el.textContent = LOADING_MSGS[loadingMsgIdx]; el.style.opacity = '1'; }, 300);
+        const msgEl = document.getElementById('loading-msg');
+        msgEl.style.opacity = '0';
+        setTimeout(() => {
+          msgEl.textContent = LOADING_MSGS[loadingMsgIdx];
+          msgEl.style.opacity = '1';
+        }, 300);
       }, 2000);
     }
 
@@ -666,8 +680,8 @@
         body.appendChild(tw);
       }
 
-      row(body, 'Core strength', data.strength, 'strength-row', 'strength-text');
-      row(body, 'Watch out for', data.watch_out, 'watchout-row', 'watchout-text');
+      row(body, 'Core strength', data.strength,  'strength-row', 'strength-text');
+      row(body, 'Watch out for', data.watch_out,  'watchout-row', 'watchout-text');
 
       showScreen('screen-result');
       requestAnimationFrame(() => requestAnimationFrame(() =>
@@ -681,7 +695,7 @@
       showScreen('screen-intro');
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Screen transitions ────────────────────────────────────────────────────
 
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => {
@@ -697,6 +711,8 @@
       }));
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     function shuffle(arr) {
       const a = [...arr];
       for (let i = a.length - 1; i > 0; i--) {
@@ -706,32 +722,17 @@
       return a;
     }
 
-    function el(tag, cls) {
-      const e = document.createElement(tag);
-      if (cls) e.className = cls;
-      return e;
-    }
-    function para(parent, text) {
-      if (!text) return;
-      const p = el('p', 'result-para');
-      p.textContent = text;
-      parent.appendChild(p);
-    }
-    function label(text) {
-      const d = el('div', 'section-label');
-      d.textContent = text;
-      return d;
-    }
-    function row(parent, labelText, text, rowCls, textCls) {
+    function el(tag, cls)   { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+    function para(p, text)  { if (!text) return; const d = el('p','result-para'); d.textContent = text; p.appendChild(d); }
+    function label(text)    { const d = el('div','section-label'); d.textContent = text; return d; }
+    function row(p, lbl, text, rowCls, txtCls) {
       if (!text) return;
       const d = el('div', rowCls);
-      d.appendChild(label(labelText));
-      const t = el('div', textCls);
-      t.textContent = text;
-      d.appendChild(t);
-      parent.appendChild(d);
+      d.appendChild(label(lbl));
+      const t = el('div', txtCls); t.textContent = text; d.appendChild(t);
+      p.appendChild(d);
     }
-    function str(v) { return typeof v === 'string' ? v : ''; }
+    function str(v)         { return typeof v === 'string' ? v : ''; }
     function hexToRgba(hex, a) {
       const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
       return `rgba(${r},${g},${b},${a})`;
