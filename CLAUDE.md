@@ -1,6 +1,6 @@
 # FBSG AI Worker Archetype Quiz
 
-A mobile-first web app that maps FUJIFILM Business Innovation Singapore marketing professionals to one of three AI worker archetypes (Cyborg, Centaur, Delegator) through a 7-question quiz, then uses the Claude API to generate a personalised result. Deployed to Vercel, accessed via QR code or link on smartphones.
+A mobile-first web app that maps FUJIFILM Business Innovation Singapore marketing professionals to one of three AI worker archetypes (Cyborg, Centaur, Self-Automator) through a 7-question quiz, then uses the Claude API to generate a personalised result. Deployed to Vercel, accessed via QR code or link on smartphones.
 
 ## Claude's Role
 

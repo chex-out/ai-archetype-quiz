@@ -1,4 +1,4 @@
-const ARCH_NAMES = { CY: 'Cyborg', CE: 'Centaur', DE: 'Delegator' };
+const ARCH_NAMES = { CY: 'Cyborg', CE: 'Centaur', DE: 'Self-Automator' };
 
 function buildPrompt({ archScores, dominantArch, secondaryArch, roleText }) {
   const dominantName = ARCH_NAMES[dominantArch];
@@ -25,9 +25,9 @@ ${secondaryLine ? '- ' + secondaryLine : '- No significant secondary style.'}
 Background on the three working styles, from BCG research:
 - Cyborg (60% of workers): integrates AI throughout their work as a thinking partner; highest rate of AI fluency development
 - Centaur (14% of workers): makes deliberate divisions between what they handle and what AI handles; highest accuracy
-- Delegator (27% of workers): uses AI primarily for efficiency and offloading tasks; most common starting point
+- Self-Automator (27% of workers): uses AI primarily for efficiency and offloading tasks; most common starting point
 
-Write a role_paragraph (max 60 words) that is specific to how AI will change or amplify work in their stated role, given their working style. Be concrete and forward-looking. Do not mention the style name (Cyborg, Centaur, Delegator) explicitly. Write in second person. British English. No em dashes.
+Write a role_paragraph (max 60 words) that is specific to how AI will change or amplify work in their stated role, given their working style. Be concrete and forward-looking. Do not mention the style name (Cyborg, Centaur, Self-Automator) explicitly. Write in second person. British English. No em dashes.
 
 Return ONLY a valid JSON object with exactly this key — no markdown, no explanation:
 {"role_paragraph": "..."}`;
