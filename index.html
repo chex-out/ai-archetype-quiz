@@ -97,6 +97,7 @@
       font-size: 22px; line-height: 1.4; margin-bottom: 28px;
     }
     .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .options-list.job-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .option-card {
       width: 100%; padding: 16px;
       border-radius: 8px; border: 1px solid var(--border);
@@ -105,6 +106,8 @@
       color: var(--text); text-align: left; cursor: pointer;
       line-height: 1.5; transition: border-color 150ms, background 150ms;
     }
+    .job-grid .option-card { padding: 12px 10px; font-size: 14px; text-align: center; }
+    .job-grid .option-card.full-width { grid-column: 1 / -1; text-align: left; }
     .option-card.selected { border: 2px solid var(--accent); background: #F0FAF7; }
     .freetext-wrap { margin-top: 12px; display: none; }
     .freetext-wrap.visible { display: block; }
@@ -237,7 +240,8 @@
   </div>
   <script>
     const ARCH_NAMES   = { CY: 'Cyborg', CE: 'Centaur', DE: 'Self-Automator' };
-    const ARCH_COLOURS = { CY: '#004afb', CE: '#c04b11', DE: '#a4e519' };
+    const ARCH_COLOURS      = { CY: '#004afb', CE: '#c04b11', DE: '#a4e519' };
+    const ARCH_TEXT_COLOURS = { CY: '#004afb', CE: '#c04b11', DE: '#7aad00' };
     const ARCH_IMAGES  = { CY: 'images/cyborg_v2.png', CE: 'images/centaur_v2.png', DE: 'images/self-automator_v2.png' };
 
     const ARCH_STATIC = {
@@ -389,19 +393,19 @@
         isJobFunction: true,
         text: 'What best describes your role?',
         options: [
-          { label: 'Product Marketing',         code: 'PM' },
-          { label: 'Brand & Comms',             code: 'BC' },
-          { label: 'Customer Experience',       code: 'CX' },
-          { label: 'Business / Data Analytics', code: 'DA' },
-          { label: 'Sales Operations',          code: 'SO' },
-          { label: 'Marketing Operations',      code: 'MO' },
-          { label: 'RevOps',                    code: 'RO' },
-          { label: 'Campaigns / Demand Gen',    code: 'CD' },
-          { label: 'Deal Governance',           code: 'DG' },
-          { label: 'Sales Compensation',        code: 'SC' },
-          { label: 'Leadership / Management',   code: 'LM' },
           { label: 'Admin & Executive Support', code: 'AE' },
-          { label: 'Other',                     code: 'OT' },
+          { label: 'Brand & Comms',             code: 'BC' },
+          { label: 'Business / Data Analytics', code: 'DA' },
+          { label: 'Campaigns / Demand Gen',    code: 'CD' },
+          { label: 'Customer Experience',       code: 'CX' },
+          { label: 'Deal Governance',           code: 'DG' },
+          { label: 'Leadership / Management',   code: 'LM' },
+          { label: 'Marketing Operations',      code: 'MO' },
+          { label: 'Product Marketing',         code: 'PM' },
+          { label: 'RevOps',                    code: 'RO' },
+          { label: 'Sales Compensation',        code: 'SC' },
+          { label: 'Sales Operations',          code: 'SO' },
+          { label: 'Other',                     code: 'OT', fullWidth: true },
         ],
       },
     ];
@@ -463,12 +467,13 @@
       const continueBtnWrap = document.getElementById('btn-continue-wrap');
       const continueBtn     = document.getElementById('btn-continue');
       listEl.innerHTML = '';
+      listEl.classList.remove('job-grid');
 
       if (q.isJobFunction) {
-        // Fixed order, no shuffle
+        listEl.classList.add('job-grid');
         q.options.forEach(opt => {
           const btn = document.createElement('button');
-          btn.className = 'option-card';
+          btn.className = 'option-card' + (opt.fullWidth ? ' full-width' : '');
           btn.textContent = opt.label;
           if (prev && prev.code === opt.code) btn.classList.add('selected');
           btn.addEventListener('click', () => selectJobOption(btn, opt));
@@ -643,9 +648,10 @@
     // ── Result ────────────────────────────────────────────────────────────────
 
     function renderResult(scores, dominant, secondary, data) {
-      const colour = ARCH_COLOURS[dominant];
-      const name   = ARCH_NAMES[dominant];
-      const stat   = ARCH_STATIC[dominant];
+      const colour     = ARCH_COLOURS[dominant];
+      const textColour = ARCH_TEXT_COLOURS[dominant];
+      const name       = ARCH_NAMES[dominant];
+      const stat       = ARCH_STATIC[dominant];
 
       document.getElementById('result-hero').style.background = hexToRgba(colour, 0.08);
       const imgEl = document.getElementById('result-arch-img');
@@ -653,7 +659,7 @@
       imgEl.alt = name;
       imgEl.style.borderColor = colour;
       document.getElementById('result-arch-name').textContent = name;
-      document.getElementById('result-arch-name').style.color = colour;
+      document.getElementById('result-arch-name').style.color = textColour;
       document.getElementById('result-tagline').textContent = str(data.tagline);
       document.getElementById('result-pct').textContent = secondary
         ? `${name} ${pct(scores, dominant)}%  ·  ${ARCH_NAMES[secondary]} ${pct(scores, secondary)}%`
@@ -687,8 +693,8 @@
         const tw = el('div', 'traits-wrap');
         data.traits.slice(0, 4).forEach(t => {
           const chip = el('span', 'trait-chip');
-          chip.style.borderColor = colour;
-          chip.style.color = colour;
+          chip.style.borderColor = textColour;
+          chip.style.color = textColour;
           chip.textContent = t;
           tw.appendChild(chip);
         });
